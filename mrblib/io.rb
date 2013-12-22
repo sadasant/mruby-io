@@ -89,9 +89,9 @@ class IO
     0
   end
 
-  def _read_buf
+  def _read_buf(size=nil)
     return @buf if @buf && @buf.size > 0
-    @buf = sysread(BUF_SIZE)
+    @buf = sysread(size || BUF_SIZE)
   end
 
   def _ungets(substr)
@@ -123,7 +123,7 @@ class IO
     str = ''
     while 1
       begin
-        _read_buf
+        _read_buf(length)
       rescue EOFError => e
         str = nil  if str.empty?
         break
@@ -139,6 +139,7 @@ class IO
         str += @buf
         @pos += @buf.size
         @buf = ''
+        break
       end
     end
 
