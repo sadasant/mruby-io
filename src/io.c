@@ -49,7 +49,8 @@ mrb_io_modestr_to_flags(mrb_state *mrb, const char *mode)
       case ':':
         /* XXX: PASSTHROUGH*/
       default:
-        mrb_raisef(mrb, E_ARGUMENT_ERROR, "illegal access mode %s", mode);
+        break;
+        // mrb_raisef(mrb, E_ARGUMENT_ERROR, "illegal access mode %s", mode);
     }
   }
 
@@ -175,7 +176,8 @@ io_open(mrb_state *mrb, mrb_value path, int flags, int perm)
   const char *pat;
   int modenum;
 
-  pat = mrb_string_value_cstr(mrb, &path);
+  pat = mrb_str_ptr(path)->ptr;
+
   modenum = mrb_io_flags_to_modenum(mrb, flags);
 
   return open(pat, modenum, perm);
@@ -387,6 +389,7 @@ mrb_io_s_sysopen(mrb_state *mrb, mrb_value klass)
   mrb_int fd, flags, perm = -1;
 
   mrb_get_args(mrb, "S|Si", &path, &mode, &perm);
+
   if (mrb_nil_p(mode)) {
     mode = mrb_str_new_cstr(mrb, "r");
   }
@@ -394,10 +397,8 @@ mrb_io_s_sysopen(mrb_state *mrb, mrb_value klass)
     perm = 0666;
   }
 
-  flags = mrb_io_modestr_to_flags(mrb, mrb_string_value_cstr(mrb, &mode));
+  flags = mrb_io_modestr_to_flags(mrb, mrb_str_ptr(mode)->ptr);
   fd = io_open(mrb, path, flags, perm);
-  if (fd == -1)
-    mrb_sys_fail(mrb, mrb_str_to_cstr(mrb, path));
 
   return mrb_fixnum_value(fd);
 }
